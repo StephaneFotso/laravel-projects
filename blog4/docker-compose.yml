@@ -1,0 +1,31 @@
+services:
+  laravel_eleven_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: laravel_eleven_app_image
+    container_name: laravel_eleven_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - laravel_eleven_app_network
+
+  laravel_eleven_webserver:
+    image: nginx:alpine
+    container_name: laravel_eleven_webserver_container
+    restart: unless-stopped
+    ports:
+      - "6162:80"
+    volumes:
+      - ./:/var/www/html
+      - ./config/nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - laravel_eleven_app
+    networks:
+      - laravel_eleven_app_network
+
+networks:
+  laravel_eleven_app_network:
+    driver: bridge
