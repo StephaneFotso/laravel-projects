@@ -11,7 +11,7 @@ services:
     restart: unless-stopped
     working_dir: /var/www/html
     volumes:
-      - ./:/var/www/html
+      - ./:/var/www
     networks:
       - laravel_eleven_app_network
 
@@ -22,7 +22,7 @@ services:
     ports:
       - "6162:80"
     volumes:
-      - ./:/var/www/html
+      - ./:/var/www
       - ./config/nginx/conf.d:/etc/nginx/conf.d
     depends_on:
       - laravel_eleven_app
