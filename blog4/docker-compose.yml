@@ -1,6 +1,9 @@
 services:
   laravel_eleven_app:
     build:
+      args:
+        user: laravel_eleven_user
+        uid: 1000
       context: .
       dockerfile: Dockerfile
     image: laravel_eleven_app_image
