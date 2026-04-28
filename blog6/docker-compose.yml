@@ -9,7 +9,7 @@ services:
         user: laravel_eleven_user
         uid: 1000
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: Dockerfile
     image: laravel_eleven_app_image
     container_name: laravel_eleven_app
     restart: unless-stopped
@@ -26,6 +26,11 @@ services:
     restart: unless-stopped
     ports:
       - "6162:80"
+    depends_on:
+      - laravel_eleven_app
+    volumes:
+      - ./:/var/www
+      - ./config/nginx/conf.d/:/etc/nginx/conf.d
     networks:
       - laravel_eleven_app_network
 
