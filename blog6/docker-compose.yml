@@ -47,9 +47,30 @@ services:
       MYSQL_DATABASE: laravel_eleven_db
       MYSQL_USER: laravel_eleven_user
       MYSQL_PASSWORD: password
+    volumes:
+      - laravel_eleven_mysql_data:/var/lib/mysql
+    networks:
+      - laravel_eleven_app_network
+
+  laravel_eleven_phpmyadmin:
+    image: phpmyadmin:5.2.1-apache
+    container_name: laravel_eleven_phpmyadmin_container
+    restart: unless-stopped
+    ports:
+      - "8383:80"
+    environment:
+      PMA_HOST: laravel_eleven_app_mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: password
+    depends_on:
+      - laravel_eleven_app_mysql
     networks:
       - laravel_eleven_app_network
 
 networks:
   laravel_eleven_app_network:
     driver: bridge
+volumes:
+  laravel_eleven_mysql_data:
+    driver: local
