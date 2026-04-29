@@ -1,42 +1,47 @@
 services:
-  # PHP Service container
+  # -----------------------------
+  # PHP (Laravel)
+  # -----------------------------
   laravel_eleven_app:
-    platform: linux/amd64
     build:
+      context: .
+      dockerfile: Dockerfile
       args:
         user: laravel_eleven_user
         uid: 1000
-      context: .
-      dockerfile: Dockerfile
     image: laravel_eleven_app_image
     container_name: laravel_eleven_app
     restart: unless-stopped
-    depends_on:
-      - laravel_eleven_app_mysql
     working_dir: /var/www
     volumes:
       - ./:/var/www
+    depends_on:
+      laravel_eleven_app_mysql:
+        condition: service_healthy
     networks:
       - laravel_eleven_app_network
-  #nginx service
+
+  # -----------------------------
+  # NGINX
+  # -----------------------------
   laravel_eleven_webserver:
-    platform: linux/amd64
     image: nginx:alpine
     container_name: laravel_eleven_webserver_container
     restart: unless-stopped
     ports:
       - "6162:80"
-    depends_on:
-      - laravel_eleven_app
     volumes:
       - ./:/var/www
-      - ./config/nginx/conf.d/:/etc/nginx/conf.d
+      - ./config/nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - laravel_eleven_app
     networks:
       - laravel_eleven_app_network
 
-  #mysql service
+  # -----------------------------
+  # MySQL
+  # -----------------------------
   laravel_eleven_app_mysql:
-    platform: linux/amd64
     image: mysql:8.0
     container_name: laravel_eleven_app_mysql_container
     restart: unless-stopped
@@ -51,7 +56,15 @@ services:
       - laravel_eleven_mysql_data:/var/lib/mysql
     networks:
       - laravel_eleven_app_network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # -----------------------------
+  # phpMyAdmin
+  # -----------------------------
   laravel_eleven_phpmyadmin:
     image: phpmyadmin:5.2.1-apache
     container_name: laravel_eleven_phpmyadmin_container
@@ -64,13 +77,21 @@ services:
       PMA_USER: root
       PMA_PASSWORD: password
     depends_on:
-      - laravel_eleven_app_mysql
+      laravel_eleven_app_mysql:
+        condition: service_healthy
     networks:
       - laravel_eleven_app_network
 
+# -----------------------------
+# NETWORK
+# -----------------------------
 networks:
   laravel_eleven_app_network:
     driver: bridge
+
+# -----------------------------
+# VOLUME
+# -----------------------------
 volumes:
   laravel_eleven_mysql_data:
     driver: local
